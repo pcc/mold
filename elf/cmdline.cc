@@ -530,6 +530,8 @@ std::vector<std::string> parse_nonpositional_args(Context<E> &ctx) {
                read_flag("mips64r3") || read_flag("mips64r4") ||
                read_flag("mips64r5") || read_flag("mips64r6")) {
       // Ignore useless MIPS-specific flags
+    } else if (read_arg("mllvm")) {
+      ctx.arg.plugin_opt.push_back(std::string(arg));
     } else if (read_arg("m")) {
       if (arg == "elf_x86_64") {
         ctx.arg.emulation = X86_64::target_name;
