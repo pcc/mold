@@ -726,7 +726,7 @@ std::vector<std::string> parse_nonpositional_args(Context<E> &ctx) {
       ctx.arg.relocatable_merge_sections = true;
     } else if (read_flag("perf")) {
       ctx.arg.perf = true;
-    } else if (read_flag("pack-dyn-relocs=relr")) {
+    } else if (read_flag("pack-dyn-relocs=android+relr") || read_flag("pack-dyn-relocs=relr")) {
       ctx.arg.pack_dyn_relocs_relr = true;
     } else if (read_flag("pack-dyn-relocs=none")) {
       ctx.arg.pack_dyn_relocs_relr = false;
@@ -1106,6 +1106,11 @@ std::vector<std::string> parse_nonpositional_args(Context<E> &ctx) {
     } else if (read_z_arg("common-page-size")) {
     } else if (read_flag("no-keep-memory")) {
     } else if (read_arg("max-cache-size")) {
+    } else if (read_flag("use-android-relr-tags")) {
+    } else if (read_arg("android-memtag-mode")) {
+    } else if (read_flag("android-memtag-heap")) {
+    } else if (read_arg("keep-unique")) {
+    } else if (read_arg("error-limit")) {
     } else if (read_arg("version-script")) {
       // --version-script, --dynamic-list and --export-dynamic-symbol[-list]
       // are treated as positional arguments even if they are actually not
