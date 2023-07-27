@@ -494,6 +494,8 @@ void InputSection<E>::scan_relocations(Context<E> &ctx) {
       // constant, we may be able to rewrite the ADRP+LDR instruction pair
       // with an ADRP+ADD, eliminating a GOT memory load.
       if (ctx.arg.relax && sym.is_relative() && !sym.is_imported &&
+          (!sym.get_input_section() ||
+           sym.value <= sym.get_input_section()->sh_size) &&
           !sym.is_ifunc() && i + 1 < rels.size()) {
         // ADRP+LDR must be consecutive and use the same register to relax.
         const ElfRel<E> &rel2 = rels[i + 1];
