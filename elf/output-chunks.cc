@@ -817,6 +817,8 @@ static std::vector<Word<E>> create_dynamic_section(Context<E> &ctx) {
     flags1 |= DF_1_INITFIRST;
   if (ctx.arg.z_interpose)
     flags1 |= DF_1_INTERPOSE;
+  if (ctx.arg.z_global)
+    flags1 |= DF_1_GLOBAL;
 
   if (!ctx.got->gottp_syms.empty())
     flags |= DF_STATIC_TLS;

@@ -1752,6 +1752,7 @@ struct Context {
     bool z_dynamic_undefined_weak = true;
     bool z_execstack = false;
     bool z_execstack_if_needed = false;
+    bool z_global = false;
     bool z_ibt = false;
     bool z_initfirst = false;
     bool z_interpose = false;

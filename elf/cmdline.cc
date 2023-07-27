@@ -884,6 +884,8 @@ std::vector<std::string> parse_nonpositional_args(Context<E> &ctx) {
       ctx.arg.z_dynamic_undefined_weak = true;
     } else if (read_z_flag("nodynamic-undefined-weak")) {
       ctx.arg.z_dynamic_undefined_weak = false;
+    } else if (read_z_flag("global")) {
+      ctx.arg.z_global = true;
     } else if (read_flag("no-undefined")) {
       ctx.arg.z_defs = true;
     } else if (read_flag("fatal-warnings")) {
