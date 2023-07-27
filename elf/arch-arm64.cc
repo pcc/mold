@@ -31,13 +31,15 @@ static void write_adr(u8 *buf, u64 val) {
   *(ul32 *)buf |= (bits(val, 1, 0) << 29) | (bits(val, 20, 2) << 5);
 }
 
-static void write_movn_movz(u8 *buf, i64 val) {
-  *(ul32 *)buf &= 0b0000'0000'0110'0000'0000'0000'0001'1111;
+static void write_movn_movz_movk(u8 *buf, i64 val) {
+  u32 inst = *(ul32 *)buf; 
+  inst &= 0b1010'0000'0110'0000'0000'0000'0001'1111;
 
-  if (val >= 0)
-    *(ul32 *)buf |= 0xd280'0000 | (bits(val, 15, 0) << 5);  // rewrite to movz
+  if (val >= 0 || (inst & (1 << 29)))
+    inst |= 0x5280'0000 | (bits(val, 15, 0) << 5);  // rewrite to movz or preserve as movk
   else
-    *(ul32 *)buf |= 0x9280'0000 | (bits(~val, 15, 0) << 5); // rewrite to movn
+    inst |= 0x1280'0000 | (bits(~val, 15, 0) << 5); // rewrite to movn
+  *(ul32 *)buf = inst;
 }
 
 static u64 page(u64 val) {
@@ -215,6 +217,9 @@ void InputSection<E>::apply_reloc_alloc(Context<E> &ctx, u8 *base) {
     case R_AARCH64_MOVW_UABS_G3:
       *(ul32 *)loc |= bits(S + A, 63, 48) << 5;
       break;
+    case R_AARCH64_MOVW_PREL_G3:
+      write_movn_movz_movk(loc, (S + A - P) >> 48);
+      break;
     case R_AARCH64_ADR_GOT_PAGE:
       if (sym.has_got(ctx)) {
         i64 val = page(G + GOT + A) - page(P);
@@ -325,7 +330,7 @@ void InputSection<E>::apply_reloc_alloc(Context<E> &ctx, u8 *base) {
     case R_AARCH64_TLSLE_MOVW_TPREL_G0: {
       i64 val = S + A - ctx.tp_addr;
       check(val, -(1 << 15), 1 << 15);
-      write_movn_movz(loc, val);
+      write_movn_movz_movk(loc, val);
       break;
     }
     case R_AARCH64_TLSLE_MOVW_TPREL_G0_NC:
@@ -334,7 +339,7 @@ void InputSection<E>::apply_reloc_alloc(Context<E> &ctx, u8 *base) {
     case R_AARCH64_TLSLE_MOVW_TPREL_G1: {
       i64 val = S + A - ctx.tp_addr;
       check(val, -(1LL << 31), 1LL << 31);
-      write_movn_movz(loc, val >> 16);
+      write_movn_movz_movk(loc, val >> 16);
       break;
     }
     case R_AARCH64_TLSLE_MOVW_TPREL_G1_NC:
@@ -343,7 +348,7 @@ void InputSection<E>::apply_reloc_alloc(Context<E> &ctx, u8 *base) {
     case R_AARCH64_TLSLE_MOVW_TPREL_G2: {
       i64 val = S + A - ctx.tp_addr;
       check(val, -(1LL << 47), 1LL << 47);
-      write_movn_movz(loc, val >> 32);
+      write_movn_movz_movk(loc, val >> 32);
       break;
     }
     case R_AARCH64_TLSLE_ADD_TPREL_HI12: {
@@ -559,6 +564,7 @@ void InputSection<E>::scan_relocations(Context<E> &ctx) {
     case R_AARCH64_MOVW_UABS_G2:
     case R_AARCH64_MOVW_UABS_G2_NC:
     case R_AARCH64_MOVW_UABS_G3:
+    case R_AARCH64_MOVW_PREL_G3:
     case R_AARCH64_PREL16:
     case R_AARCH64_PREL32:
     case R_AARCH64_PREL64:
