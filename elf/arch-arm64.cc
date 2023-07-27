@@ -298,6 +298,10 @@ void InputSection<E>::apply_reloc_alloc(Context<E> &ctx, u8 *base) {
       check(S + A - P, -(1LL << 20), 1LL << 20);
       *(ul32 *)loc |= bits(S + A - P, 20, 2) << 5;
       break;
+    case R_AARCH64_TSTBR14:
+      check(S + A - P, -(1LL << 15), 1LL << 15);
+      *(ul32 *)loc |= bits(S + A - P, 15, 2) << 5;
+      break;
     case R_AARCH64_PREL16:
       check(S + A - P, -(1LL << 15), 1LL << 15);
       *(ul16 *)loc = S + A - P;
@@ -552,6 +556,7 @@ void InputSection<E>::scan_relocations(Context<E> &ctx) {
     case R_AARCH64_ADR_PREL_LO21:
     case R_AARCH64_CONDBR19:
     case R_AARCH64_LD_PREL_LO19:
+    case R_AARCH64_TSTBR14:
     case R_AARCH64_LDST16_ABS_LO12_NC:
     case R_AARCH64_LDST32_ABS_LO12_NC:
     case R_AARCH64_LDST64_ABS_LO12_NC:
