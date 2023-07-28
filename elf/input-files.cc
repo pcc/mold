@@ -635,6 +635,9 @@ split_section(Context<E> &ctx, InputSection<E> &sec) {
       entsize = 1;
     }
 
+    if (shdr.sh_addralign > entsize)
+      return nullptr;
+
     while (!data.empty()) {
       size_t end = find_null(data, entsize);
       if (end == data.npos)
