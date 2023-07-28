@@ -1291,10 +1291,14 @@ void GotSection<E>::copy_buf(Context<E> &ctx) {
     if (ent.is_relr(ctx) || ent.r_type == R_NONE) {
       buf[ent.idx] = ent.val;
     } else {
+      u64 symidx = ent.sym ? ent.sym->get_dynsym_idx(ctx) : 0;
+      u64 addend = ent.val;
+      if (ent.sym && !ent.sym->is_imported && ent.sym->get_type() == STT_TLS) {
+        symidx = 0;
+        addend += ent.sym->get_addr(ctx) - ctx.tls_begin;
+      }
       *rel++ = ElfRel<E>(this->shdr.sh_addr + ent.idx * sizeof(Word<E>),
-                         ent.r_type,
-                         ent.sym ? ent.sym->get_dynsym_idx(ctx) : 0,
-                         ent.val);
+                         ent.r_type, symidx, addend);
 
       if (ctx.arg.apply_dynamic_relocs)
         buf[ent.idx] = ent.val;
